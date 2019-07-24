@@ -462,6 +462,31 @@ void shake128_squeezeblocks(unsigned char *output, unsigned long long nblocks, u
   keccak_squeezeblocks(output, nblocks, s, SHAKE128_RATE);
 }
 
+void shake128(unsigned char *output, unsigned long long outlen,
+              const unsigned char *input,  unsigned long long inlen)
+{
+  uint64_t s[25];
+  unsigned char t[SHAKE128_RATE];
+  unsigned long long nblocks = outlen/SHAKE128_RATE;
+  size_t i;
+
+  /* Absorb input */
+  keccak_absorb(s, SHAKE128_RATE, input, inlen, 0x1F);
+
+  /* Squeeze output */
+  keccak_squeezeblocks(output, nblocks, s, SHAKE128_RATE);
+
+  output+=nblocks*SHAKE128_RATE;
+  outlen-=nblocks*SHAKE128_RATE;
+
+  if(outlen)
+  {
+    keccak_squeezeblocks(t, 1, s, SHAKE128_RATE);
+    for(i=0;i<outlen;i++)
+      output[i] = t[i];
+  }
+}
+
 /*************************************************
 * Name:        shake256
 *

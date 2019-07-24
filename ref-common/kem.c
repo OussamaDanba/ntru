@@ -4,12 +4,15 @@
 #include "verify.h"
 #include "owcpa.h"
 
-// API FUNCTIONS 
+// API FUNCTIONS
 int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 {
+  unsigned char temp[32];
   unsigned char seed[NTRU_SAMPLE_FG_BYTES];
 
-  randombytes(seed, NTRU_SAMPLE_FG_BYTES);
+  //randombytes(seed, NTRU_SAMPLE_FG_BYTES);
+  randombytes(temp, 32);
+  shake128(seed, NTRU_SAMPLE_FG_BYTES, temp, 32);
   owcpa_keypair(pk, sk, seed);
 
   randombytes(sk+NTRU_OWCPA_SECRETKEYBYTES, NTRU_PRFKEYBYTES);
@@ -19,10 +22,13 @@ int crypto_kem_keypair(unsigned char *pk, unsigned char *sk)
 
 int crypto_kem_enc(unsigned char *c, unsigned char *k, const unsigned char *pk)
 {
+  unsigned char temp[32];
   unsigned char rm[NTRU_OWCPA_MSGBYTES];
   unsigned char rm_seed[NTRU_SAMPLE_RM_BYTES];
 
-  randombytes(rm_seed, NTRU_SAMPLE_RM_BYTES);
+  //randombytes(rm_seed, NTRU_SAMPLE_RM_BYTES);
+  randombytes(temp, 32);
+  shake128(rm_seed, NTRU_SAMPLE_RM_BYTES, temp, 32);
   owcpa_samplemsg(rm, rm_seed);
 
   sha3_256(k, rm, NTRU_OWCPA_MSGBYTES);
